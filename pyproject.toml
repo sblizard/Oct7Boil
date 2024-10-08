@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "oct7boil"
+version = "0.1.0"
+description = ""
+authors = ["Sean Blizard <emailseanblizard@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = {extras = ["standard"], version = "^0.115.0"}
+pinecone = {extras = ["grpc"], version = "^5.3.1"}
+openai = "^1.51.1"
+poetry = {extras = ["grpc"], version = "^1.8.3"}
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
