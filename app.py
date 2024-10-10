@@ -12,6 +12,7 @@ from pinecone.grpc import GRPCIndex as Index
 #internal
 from ios import GetEmbeddingParams, EmbeddingOutput, UpsertInput, Query, SearchOutput, Match
 
+
 load_dotenv()
 
 openai_client: AsyncOpenAI = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -21,9 +22,11 @@ index: Index = pinecone_client.Index("oct7boil")
 
 app: FastAPI = FastAPI()
 
+
 async def get_embedding(params: GetEmbeddingParams) -> EmbeddingOutput:
     embedding: list[float] = await openai_client.embeddings.create(input=params.text, model="text-embedding-ada-002")
     return EmbeddingOutput(embedding=embedding.data[0].embedding)
+
 
 def upsert_vectors(params: UpsertInput) -> None:
     vectors: list[list[float]] = []
@@ -36,11 +39,13 @@ def upsert_vectors(params: UpsertInput) -> None:
 
     index.upsert(vectors=vectors)
 
+
 @app.post("/embed")
 async def embed(text: GetEmbeddingParams) -> EmbeddingOutput:
     embeddingOut: EmbeddingOutput = await get_embedding(text)
     upsert_vectors(UpsertInput(data=embeddingOut, metadata={"text": text.text}))
     return embeddingOut
+
 
 @app.post("/search")
 async def search(query: Query) -> SearchOutput:
