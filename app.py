@@ -10,7 +10,7 @@ from pinecone.grpc import PineconeGRPC as PineconeClient
 from pinecone.grpc import GRPCIndex as Index
 
 #internal
-from ios import AddInput, CombineInput, GreetInput, AddOutput, CombineOutput, GreetOutput, GetEmbeddingParams, EmbeddingOutput, UpsertInput, Query
+from ios import AddInput, CombineInput, GreetInput, AddOutput, CombineOutput, GreetOutput, GetEmbeddingParams, EmbeddingOutput, UpsertInput, Query, SearchOutput, Match
 
 load_dotenv()
 
@@ -55,19 +55,27 @@ async def embed(text: GetEmbeddingParams) -> EmbeddingOutput:
     return embeddingOut
 
 @app.post("/search")
-
-async def search(query: Query):
+async def search(query: Query) -> SearchOutput:
     embedding: list[float] = await openai_client.embeddings.create(
     input=query.text, 
     model="text-embedding-ada-002")
 
-    embeddingoutput: EmbeddingOutput = EmbeddingOutput(embedding=embedding.data[0].embedding)
+    embedding_output: EmbeddingOutput = EmbeddingOutput(embedding=embedding.data[0].embedding)
 
     results = index.query(
-        namespace="oct7boil",
-        vector=embeddingoutput.embedding,
+        vector=embedding_output.embedding,
         top_k=3,
+        include_metadata=True
     )
 
-    return results
+    search_output: SearchOutput = SearchOutput(matches=[])
 
+    for i in range(len(results['matches'])):
+        match_data = results['matches'][i]
+        match: Match = Match(
+            id=match_data['id'], 
+            metadata=match_data['metadata'] 
+        )
+        search_output.matches.append(match)
+    
+    return search_output

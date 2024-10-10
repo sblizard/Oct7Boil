@@ -34,3 +34,9 @@ class UpsertInput(BaseModel):
 class Query(BaseModel):
     text: str
 
+class Match(BaseModel):
+    id: str
+    metadata: dict[str, str]
+
+class SearchOutput(BaseModel):
+    matches: list[Match]
